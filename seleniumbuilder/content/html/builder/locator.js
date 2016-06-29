@@ -17,6 +17,7 @@ builder.locator.methods = {
   link:       {toString: function() { return "link"; }},
   css:        {toString: function() { return "css"; }},
   xpath:      {toString: function() { return "xpath"; }},
+  openerp7:   [toString: function() { return "openerp7"; }},
 };
 
 builder.locator.methods.id[builder.selenium2] = "id";
@@ -24,6 +25,7 @@ builder.locator.methods.name[builder.selenium2] = "name";
 builder.locator.methods.link[builder.selenium2] = "link text";
 builder.locator.methods.css[builder.selenium2] = "css selector";
 builder.locator.methods.xpath[builder.selenium2] = "xpath";
+builder.locator.methods.openerp70[builder.selenium2] = "openerp70";
 
 builder.locator.methodForName = function(seleniumVersion, name) {
   for (var k in builder.locator.methods) {
@@ -194,6 +196,216 @@ builder.locator.getCSSSubPath = function(e) {
   }
 };
 
+function mainMenu(element){	
+	return "MainMenu('" + jQuery.trim(jQuery(element).attr('data-menu')) + "')";
+}
+
+function secondaryMenu(element){
+	
+	level = 0;
+	
+	try {
+		level = jQuery(element).parents().filter('.oe_secondary_submenu').length;
+
+	}catch(e){
+		if(!e instanceof NSNullPointerException){
+			throw e;
+		}
+	}
+	
+	return "SubMenu(" + level + "', '" + jQuery.trim(jQuery(element).attr('data-menu')) + "')";
+	
+}
+
+function mainContent(element){	
+	return "mainContent()";
+}
+
+function sidebar(element){
+	return "sidebar()";	
+}
+
+function inWindow(element){
+	return "inWindow()." + mainContent(element);
+}
+
+function openerp70(values, element){
+				
+	// MainMenu
+	if(jQuery(element).parents('.oe_menu').length){
+		value = jQuery.trim(jQuery(element).parent().attr('data-menu'));
+		values[builder.locator.methods.openerp70] = ["MainMenu    " + value];
+		return builder.locator.methods.openerp70;
+	}
+	
+	// SubMenu
+	if(jQuery(element).hasClass('oe_menu_text')){
+		value = jQuery.trim(jQuery(element).parent().attr('data-menu'));
+		values[builder.locator.methods.openerp70] = ["SubMenu    " + value];
+		return builder.locator.methods.openerp70;
+	}
+
+	// Button
+	if(jQuery(element).context.tagName.toLowerCase() == 'button'){
+		value = jQuery.trim(jQuery(element).attr('data-bt-testing-name'));
+		values[builder.locator.methods.openerp70] = ["Button    " + value];
+		return builder.locator.methods.openerp70;
+	}
+
+	
+	// NewOne2Many
+	if(jQuery(element).context.tagName.toLowerCase() == 'a'
+		&& jQuery(element).parents('.oe_form_field_one2many_list_row_add').length){
+		var oe_view_manager = jQuery(element).closest('div.oe_view_manager');
+		model = oe_view_manager.attr('data-bt-testing-model_name');
+		name = oe_view_manager.attr('data-bt-testing-name');
+		values[builder.locator.methods.openerp70] = ["NewOne2Many    " + model + "    " + name];
+		return builder.locator.methods.openerp70;
+	}
+	
+	// ChangeView
+	if(jQuery(element).parents('.oe_view_manager_switch').length){
+		value = jQuery.trim(jQuery(element).attr('data-view-type'));
+		values[builder.locator.methods.openerp70] = ["ChangeView    " + value];
+		return builder.locator.methods.openerp70;
+	}
+	
+	// NotebookPage
+	if(jQuery(element).context.tagName.toLowerCase() == 'a'
+		&& jQuery(element).hasClass('ui-tabs-anchor')){
+		value = jQuery(element).attr('data-bt-testing-original-string');
+		values[builder.locator.methods.openerp70] = ["NotebookPage    " + value];
+		return builder.locator.methods.openerp70;
+	}
+
+	// Many2OneSelect (writing)
+	if(jQuery(element).context.tagName.toLowerCase() == 'input'
+		&& jQuery(element).parents('.oe_form_field_many2one').length){
+		model = jQuery(element).attr('data-bt-testing-model_name');
+		name = jQuery(element).attr('data-bt-testing-name');
+		value = jQuery.trim(jQuery(element).text());
+		values[builder.locator.methods.openerp70] = ["Many2OneSelect    " + model + "    " + name];
+		return builder.locator.methods.openerp70;
+	}
+
+	// Many2OneSelect (clicking)
+	if(jQuery(element).context.tagName.toLowerCase() == 'img'
+		&& jQuery(element).parents('.oe_form_field_many2one').length){
+		model = jQuery(element).attr('data-bt-testing-model_name');
+		name = jQuery(element).attr('data-bt-testing-name');
+		value = jQuery.trim(jQuery(element).text());
+		values[builder.locator.methods.openerp70] = ["ERROR: Please check the documentation how to record Many2One fields"];
+		return builder.locator.methods.openerp70;
+	}
+
+	// TagsNew
+	if(jQuery(element).context.tagName.toLowerCase() == 'textarea'
+		&& jQuery(element).parents('.oe_tags').length){
+		model = jQuery(element).attr('data-bt-testing-model_name');
+		name = jQuery(element).attr('data-bt-testing-name');
+		value = jQuery.trim(jQuery(element).text());
+		values[builder.locator.methods.openerp70] = ["TagsNew    " + model + "    " + name + "    " + value];
+		return builder.locator.methods.openerp70;
+	}
+	
+	// TagsRemove
+	if(jQuery(element).context.tagName.toLowerCase() == 'a'
+		&& jQuery(element).attr('class').toLowerCase() == 'text-remove'
+		&& jQuery(element).parents('.oe_tags').length){
+		model = jQuery(element).attr('data-bt-testing-model_name');
+		name = jQuery(element).attr('data-bt-testing-name');
+		value = jQuery.trim(jQuery(element).siblings('span.text-label').text());
+		values[builder.locator.methods.openerp70] = ["TagsRemove    " + model + "    " + name + "    " + value];
+		return builder.locator.methods.openerp70;
+	}
+
+	// Tags (Just a click => do nothing)
+	if(jQuery(element).context.tagName.toLowerCase() == 'div'
+		&& jQuery(element).hasClass('text-tags')
+		&& jQuery(element).parents('.oe_tags').length){
+		model = jQuery(element).attr('data-bt-testing-model_name');
+		name = jQuery(element).attr('data-bt-testing-name');
+		value = jQuery.trim(jQuery(element).siblings('span.text-label').text());
+		values[builder.locator.methods.openerp70] = ["TagsRemove    " + model + "    " + name];
+		return builder.locator.methods.openerp70;
+	}
+	
+	// Checkbox
+	if(jQuery(element).context.tagName.toLowerCase() == 'input'
+		&& element.type.toLowerCase() == 'checkbox'){
+		model = jQuery(element).attr('data-bt-testing-model_name');
+		name = jQuery(element).attr('data-bt-testing-name');
+		value = jQuery.trim(jQuery(element).val());
+		values[builder.locator.methods.openerp70] = ["Checkbox    " + model + "    " + name];
+		return builder.locator.methods.openerp70;
+	}
+
+	// Date
+	if(jQuery(element).context.tagName.toLowerCase() == 'input'
+		&& jQuery(element).parents('.oe_datepicker_root').length){
+		model = jQuery(element).attr('data-bt-testing-model_name');
+		name = jQuery(element).attr('data-bt-testing-name');
+		value = jQuery.trim(jQuery(element).val());
+		values[builder.locator.methods.openerp70] = ["Date    " + model + "    " + name];
+		return builder.locator.methods.openerp70;
+	}
+	
+	// Char
+	if(jQuery(element).context.tagName.toLowerCase() == 'input'
+		&& jQuery(element).parents('.oe_form_field_char').length){
+		model = jQuery(element).attr('data-bt-testing-model_name');
+		name = jQuery(element).attr('data-bt-testing-name');
+		value = jQuery.trim(jQuery(element).val());
+		values[builder.locator.methods.openerp70] = ["Char    " + model + "    " + name];
+		return builder.locator.methods.openerp70;
+	}
+	
+	// Float
+	if(jQuery(element).context.tagName.toLowerCase() == 'input'
+		&& jQuery(element).parents('.oe_form_field_float').length){
+		model = jQuery(element).attr('data-bt-testing-model_name');
+		name = jQuery(element).attr('data-bt-testing-name');
+		value = jQuery.trim(jQuery(element).val());
+		values[builder.locator.methods.openerp70] = ["Float    " + model + "    " + name];
+		return builder.locator.methods.openerp70;
+	}
+	
+	// Text
+	if(jQuery(element).context.tagName.toLowerCase() == 'textarea'
+		&& jQuery(element).parents('.oe_form_field_text').length){
+		model = jQuery(element).attr('data-bt-testing-model_name');
+		name = jQuery(element).attr('data-bt-testing-name');
+		value = jQuery.trim(jQuery(element).val());
+		values[builder.locator.methods.openerp70] = ["Text    " + model + "    " + name];
+		return builder.locator.methods.openerp70;
+	}
+	
+	// Select (click to open the selectbox)
+	if((jQuery(element).context.tagName.toLowerCase() == 'select'
+		|| jQuery(element).context.tagName.toLowerCase() == 'select-one')
+		&& jQuery(element).parents('.oe_form_field_selection').length){
+		model = jQuery(element).attr('data-bt-testing-model_name');
+		name = jQuery(element).attr('data-bt-testing-name');
+		value = jQuery(element).find(":selected").attr('data-bt-testing-value');
+		values[builder.locator.methods.openerp70] = ["Select    " + model + "    " + name];		
+		return builder.locator.methods.openerp70;
+	}
+
+	// Select (selected one of the option)
+	if(jQuery(element).context.tagName.toLowerCase() == 'option'
+		&& jQuery(element).parents('.oe_form_field_selection').length){
+		model = jQuery(element).parent().attr('data-bt-testing-model_name');
+		name = jQuery(element).parent().attr('data-bt-testing-name');
+		value = jQuery.trim(jQuery(element).attr('data-bt-testing-value'));
+		values[builder.locator.methods.openerp70] = ["Select-Option\t" + model + "\t" + name + "\t" + value];		
+		return builder.locator.methods.openerp70;
+	}
+	
+	values[builder.locator.methods.openerp70] = ["No match: "+jQuery(element).context.tagName+'#'+jQuery(element).parents()+'='+jQuery(element).text()];
+	return builder.locator.methods.openerp70;
+}
+
+
 /**
  * Generates a best-guess locator from an element.
  * @param element The element to create a locator for
@@ -293,13 +505,27 @@ builder.locator.fromElement = function(element, applyTextTransforms) {
       preferredMethod = builder.locator.methods.css;
     }
   }
-  
+
+  preferredMethod = openerp70(values, element);
+
   var loc = new builder.locator.Locator(preferredMethod, 0, values);
   loc.__originalElement = element;
   return loc;
 };
 
 // Helper functions:
+function getModel90EE(element) {
+  var o_x2m_control_panel = jQuery(element).closest('div.o_view_manager_content.o_form_field').find('div.o_x2m_control_panel');
+  console.log("o_x2m_control_panel", o_x2m_control_panel);
+  var isX2Many = false;
+  var model = jQuery(element).attr('data-bt-testing-model_name');
+  if (o_x2m_control_panel.length) {
+    isX2Many = true;
+    model = o_x2m_control_panel.attr('data-bt-testing-submodel_name');
+  }
+  return [model, isX2Many];
+}
+
 
 /** The DOM type enum of an Element node, as opposed to eg an attribute or text. */
 var ELEMENT_NODE_TYPE = 1;

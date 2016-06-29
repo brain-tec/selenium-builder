@@ -100,7 +100,7 @@ builder.selenium2.Recorder.prototype = {
     this.writeJsonSwitchFrameIfNeeded(e.target);
     
     // Selects are handled via change events, so clicks on them can be ignored.
-    if ({ 'select': true, 'option': true }[e.target.tagName.toLowerCase()]) { return; }
+    //if ({ 'select': true, 'option': true }[e.target.tagName.toLowerCase()]) { return; }
 
     // To keep from generating multiple actions for the same click, we check if the click 
     // happened in the same place as the last one.
@@ -128,9 +128,9 @@ builder.selenium2.Recorder.prototype = {
     }, 1000);
     
     // Selects are handled via change events, so clicks on them can be ignored.
-    if ({ 'select': true, 'option': true }[e.target.tagName.toLowerCase()]) {
-      return;
-    }
+    //if ({ 'select': true, 'option': true }[e.target.tagName.toLowerCase()]) {
+    //  return;
+    //}
     
     if (e.type == 'dblclick') {
       this.recordStep(new builder.Step(builder.selenium2.stepTypes.doubleClickElement, locator));
@@ -247,10 +247,20 @@ builder.selenium2.Recorder.prototype = {
     
     // Selecting
     if (e.target.type.toLowerCase() == 'select' || e.target.type.toLowerCase() == 'select-one') {
-      var vals = {};
-      vals[builder.locator.methods.xpath] = [locator.getValueForMethod(builder.locator.methods.xpath) + "//option[" + (e.target.selectedIndex + 1) + "]"];
-      var optLoc = new builder.locator.Locator(builder.locator.methods.xpath, 0, vals);
-      
+
+      if(locator.preferredMethod == builder.locator.methods.openerp70){
+        var vals = {}
+        var model = e.target.attributes['data-bt-testing-model_name'].value;
+        var name = e.target.attributes['data-bt-testing-name'].value;
+        var value = e.target.selectedOptions[0].attributes['data-bt-testing-value'].value;
+        vals[builder.locator.methods.openerp70] = ["Select-Option\t" + model + "\t" + name + "\t" + value];
+        var optLoc = new builder.locator.Locator(builder.locator.methods.openerp70, 0, vals);
+      } else {
+	var vals = {};
+        vals[builder.locator.methods.xpath] = [locator.getValueForMethod(builder.locator.methods.xpath) + "//option[" + (e.target.selectedIndex + 1) + "]"];
+        var optLoc = new builder.locator.Locator(builder.locator.methods.xpath, 0, vals);
+      }
+
       // Add select
       this.recordStep(new builder.Step(builder.selenium2.stepTypes.setElementSelected, optLoc));
       return;
