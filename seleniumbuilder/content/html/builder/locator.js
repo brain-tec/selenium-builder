@@ -17,7 +17,8 @@ builder.locator.methods = {
   link:       {toString: function() { return "link"; }},
   css:        {toString: function() { return "css"; }},
   xpath:      {toString: function() { return "xpath"; }},
-  openerp7:   [toString: function() { return "openerp7"; }},
+
+  openerp70:  {toString: function() { return "openerp70"; }}
 };
 
 builder.locator.methods.id[builder.selenium2] = "id";
@@ -230,29 +231,179 @@ function inWindow(element){
 }
 
 function openerp70(values, element){
-				
-	// MainMenu
+
+  console.log(element);
+
+	// MainMenu 9.0 EE
+  if(jQuery(element).closest('a.o_menu_toggle').length || jQuery(element).hasClass('o_menu_toggle')){
+		values[builder.locator.methods.openerp70] = ["BackToMainMenu"];
+		return builder.locator.methods.openerp70;
+	}
+
+	// MainMenu 9.0 EE
+  if(jQuery(element).closest('div.o_application_switcher').length && jQuery(element).parent().has('a.o_action_app')){
+		value = jQuery.trim(jQuery(element).parent().attr('data-menu'));
+		values[builder.locator.methods.openerp70] = ["MainMenu    " + value];
+		return builder.locator.methods.openerp70;
+	}
+
+	// MainMenu 8.0 click in A-tag
+    if(jQuery(element).parents('#oe_main_menu_placeholder').length && jQuery(element).hasClass('oe_menu_toggler')){
+		value = jQuery.trim(jQuery(element).attr('data-menu'));
+		values[builder.locator.methods.openerp70] = ["MainMenu    " + value];
+		return builder.locator.methods.openerp70;
+	}
+
+	// MainMenu 8.0 click in SPAN-tag
+    if(jQuery(element).parents('#oe_main_menu_placeholder').length && jQuery(element).hasClass('oe_menu_text')){
+		value = jQuery.trim(jQuery(element).parent().attr('data-menu'));
+		values[builder.locator.methods.openerp70] = ["MainMenu    " + value];
+		return builder.locator.methods.openerp70;
+	}
+
+	// MainMenu 7.0
 	if(jQuery(element).parents('.oe_menu').length){
 		value = jQuery.trim(jQuery(element).parent().attr('data-menu'));
 		values[builder.locator.methods.openerp70] = ["MainMenu    " + value];
 		return builder.locator.methods.openerp70;
 	}
+
+	// SubMenu 9.0 EE
+    if(jQuery(element).context.tagName.toLowerCase() == 'a'
+      && jQuery(element).attr('data-bt-testing-sub-menu_id')){
+		value = jQuery.trim(jQuery(element).attr('data-bt-testing-sub-menu_id'));
+		values[builder.locator.methods.openerp70] = ["SubMenu    " + value];
+		return builder.locator.methods.openerp70;
+	}
+
+	// SubSubMenu 9.0 EE
+  if(jQuery(element).closest('a[class*=o_menu_entry_lvl_]').length){
+		value = jQuery.trim(jQuery(element).closest('a[class*=o_menu_entry_lvl_]').attr('data-menu'));
+		values[builder.locator.methods.openerp70] = ["SubSubMenu    " + value];
+		return builder.locator.methods.openerp70;
+	}
+/*
+	// SubSubMenu 9.0 EE
+  
+  if(jQuery(element).closest('a.o_menu_entry_lvl_2').length){
+		value = jQuery.trim(jQuery(element).closest('a.o_menu_entry_lvl_3').attr('data-menu'));
+		values[builder.locator.methods.openerp70] = ["SubSubMenu    " + value];
+		return builder.locator.methods.openerp70;
+	}*/
 	
-	// SubMenu
-	if(jQuery(element).hasClass('oe_menu_text')){
+
+
+	// SubMenu 8.0 click in A-tag
+  if(jQuery(element).parents('div.oe_secondary_menus_container').length && jQuery(element).hasClass('oe_menu_leaf')){
+		value = jQuery.trim(jQuery(element).attr('data-menu'));
+		values[builder.locator.methods.openerp70] = ["SubMenu    " + value];
+		return builder.locator.methods.openerp70;
+	}
+
+	// SubMenu 8.0 click in SPAN-tag
+  if(jQuery(element).parents('div.oe_secondary_menus_container').length && jQuery(element).hasClass('oe_menu_text')){
 		value = jQuery.trim(jQuery(element).parent().attr('data-menu'));
 		values[builder.locator.methods.openerp70] = ["SubMenu    " + value];
 		return builder.locator.methods.openerp70;
 	}
 
-	// Button
+	// SubMenu 7.0
+	if(jQuery(element).hasClass('oe_menu_text')){
+		value = jQuery.trim(jQuery(element).parent().attr('data-menu'));
+		values[builder.locator.methods.openerp70] = ["SubMenu2    " + value];
+		return builder.locator.methods.openerp70;
+	}
+
+ 	// Radio 9.0EE
+	if(jQuery(element).context.tagName.toLowerCase() == 'input'
+		&& element.type.toLowerCase() == 'radio'){
+    [model, isX2Many] = getModel90EE(element);
+		name = jQuery(element).attr('data-bt-testing-name');
+		value = jQuery(element).attr('value');
+    var keyword = isX2Many ? 'X2Many-Radio' : 'Radio';
+		values[builder.locator.methods.openerp70] = [keyword + "\t" + model + "\t" + name + "\t" + value];
+		return builder.locator.methods.openerp70;
+	}
+
+ 	// Radio 9.0EE
+	if(jQuery(element).context.tagName.toLowerCase() == 'input'
+		&& element.type.toLowerCase() == 'radio'){
+    [model, isX2Many] = getModel90EE(element);
+		name = jQuery(element).attr('data-bt-testing-name');
+		value = jQuery(element).attr('value');
+    var keyword = isX2Many ? 'X2Many-Radio' : 'Radio';
+		values[builder.locator.methods.openerp70] = [keyword + "\t" + model + "\t" + name + "\t" + value];
+		return builder.locator.methods.openerp70;
+	}
+
+  // Open SidebarAction 9.0 EE
+	if(jQuery(element).context.tagName.toLowerCase() == 'a'
+          && jQuery(element).hasClass('dropdown-toggle')
+          && jQuery(element).parents('div.o_cp_sidebar').length) {
+      // Ignored this click, print empty line
+      console.log("Open SidebarAction 9.0 EE");
+      return builder.locator.methods.openerp70;
+  }
+
+  // Open SidebarAction
+	if(jQuery(element).context.tagName.toLowerCase() == 'button'
+          && jQuery(element).hasClass('oe_dropdown_toggle')) {
+      // Ignored this click, print empty line
+      return builder.locator.methods.openerp70;
+  }
+
+	// Execute SidebarAction 9.0 EE
+	if(jQuery(element).context.tagName.toLowerCase() == 'a'
+          && jQuery(element).parents('div.o_cp_sidebar').length) {
+      var type = jQuery(element).attr('data-bt-type');
+      var id = jQuery(element).attr('data-bt-id');
+      if(!id){
+        type = jQuery(element).closest('div.o_dropdown').attr('data-bt-type');
+        id = jQuery(element).attr('data-index');
+      }
+      // if values, otherwise print empty line
+      if(type && id) {
+        values[builder.locator.methods.openerp70] = ["SidebarAction\t" + type + "\t" + id];
+      }
+      return builder.locator.methods.openerp70;
+    }
+
+  // The blue arrow on the right side of a many2one
+  // Many2One-External 9.0 EE (element==button, so must before button)
+	if(jQuery(element).context.tagName.toLowerCase() == 'button'
+      && jQuery(element).closest('div.o_form_field_many2one').length){
+    var model = jQuery(element).closest('div.o_form_field_many2one').find(':input[data-bt-testing-model_name]').attr('data-bt-testing-model_name');
+    var field = jQuery(element).closest('div.o_form_field_many2one').find(':input[data-bt-testing-model_name]').attr('data-bt-testing-name');
+		value = jQuery.trim(jQuery(element).attr('data-view-type'));
+		values[builder.locator.methods.openerp70] = ["Many2One-External\t" + model + "\t" + field];
+		return builder.locator.methods.openerp70;
+	}
+
+
+  // ChangeView 9.0 EE (element==button, so must before button)
+	if(jQuery(element).closest('div.o_cp_switch_buttons').length){
+		value = jQuery.trim(jQuery(element).attr('data-view-type'));
+		values[builder.locator.methods.openerp70] = ["ChangeView    " + value];
+		return builder.locator.methods.openerp70;
+	}
+
+	// Button 9.0 EE
 	if(jQuery(element).context.tagName.toLowerCase() == 'button'){
 		value = jQuery.trim(jQuery(element).attr('data-bt-testing-name'));
 		values[builder.locator.methods.openerp70] = ["Button    " + value];
 		return builder.locator.methods.openerp70;
 	}
 
-	
+	// NewOne2Many 90 EE
+	if(jQuery(element).context.tagName.toLowerCase() == 'a'
+		&& jQuery(element).parents('.o_form_field_x2many_list_row_add').length){
+		var o_x2m_control_panel = jQuery(element).closest('div.o_view_manager_content').find('div.o_x2m_control_panel');
+		model = o_x2m_control_panel.attr('data-bt-testing-model_name');
+		name = o_x2m_control_panel.attr('data-bt-testing-name');
+		values[builder.locator.methods.openerp70] = ["NewOne2Many    " + model + "\t" + name];
+		return builder.locator.methods.openerp70;
+	}
+
 	// NewOne2Many
 	if(jQuery(element).context.tagName.toLowerCase() == 'a'
 		&& jQuery(element).parents('.oe_form_field_one2many_list_row_add').length){
@@ -278,7 +429,19 @@ function openerp70(values, element){
 		return builder.locator.methods.openerp70;
 	}
 
-	// Many2OneSelect (writing)
+	// Many2OneSelect (writing), 90 EE
+	if(jQuery(element).context.tagName.toLowerCase() == 'input'
+		&& jQuery(element).parents('.o_form_field_many2one').length){
+    [model, isX2Many] = getModel90EE(element);
+		name = jQuery(element).attr('data-bt-testing-name');
+		value = jQuery.trim(jQuery(element).text());
+    var keyword = isX2Many ? 'X2Many-Many2OneSelect' : 'Many2OneSelect';
+		values[builder.locator.methods.openerp70] = [keyword + "\t" + model + "\t" + name];
+		return builder.locator.methods.openerp70;
+	}
+
+
+	// Many2OneSelect (writing), 7.0, 8.0
 	if(jQuery(element).context.tagName.toLowerCase() == 'input'
 		&& jQuery(element).parents('.oe_form_field_many2one').length){
 		model = jQuery(element).attr('data-bt-testing-model_name');
@@ -369,7 +532,18 @@ function openerp70(values, element){
 		values[builder.locator.methods.openerp70] = ["Float    " + model + "    " + name];
 		return builder.locator.methods.openerp70;
 	}
-	
+
+	// Text 9.0 EE
+	if(jQuery(element).prop("tagName").toLowerCase() == 'textarea'
+		&& jQuery(element).hasClass('o_form_textarea')){
+
+    [model, isX2Many] = getModel90EE(element);
+		name = jQuery(element).attr('data-bt-testing-name');
+    var keyword = isX2Many ? 'X2Many-Text' : 'Text';
+		values[builder.locator.methods.openerp70] = [keyword + "\t" + model + "\t" + name];
+		return builder.locator.methods.openerp70;
+	}
+
 	// Text
 	if(jQuery(element).context.tagName.toLowerCase() == 'textarea'
 		&& jQuery(element).parents('.oe_form_field_text').length){
@@ -379,28 +553,82 @@ function openerp70(values, element){
 		values[builder.locator.methods.openerp70] = ["Text    " + model + "    " + name];
 		return builder.locator.methods.openerp70;
 	}
-	
-	// Select (click to open the selectbox)
-	if((jQuery(element).context.tagName.toLowerCase() == 'select'
-		|| jQuery(element).context.tagName.toLowerCase() == 'select-one')
-		&& jQuery(element).parents('.oe_form_field_selection').length){
-		model = jQuery(element).attr('data-bt-testing-model_name');
-		name = jQuery(element).attr('data-bt-testing-name');
-		value = jQuery(element).find(":selected").attr('data-bt-testing-value');
-		values[builder.locator.methods.openerp70] = ["Select    " + model + "    " + name];		
-		return builder.locator.methods.openerp70;
+
+  // Select From List 9.0 "Temporal"
+  if(jQuery(element).context.tagName.toLowerCase() == 'option'
+    && jQuery(element).parents('select').length){
+    value = jQuery(element).attr('value');
+    name = jQuery(element).closest('select').attr('data-bt-testing-name');
+    model = jQuery(element).closest('select').attr('data-bt-testing-model_name');
+    // because option is normaly handled by onchange, we set it to something different
+    element = 'hello world'
+    values[builder.locator.methods.openerp70] = ["Select-Option\t" + model + "\t" + name + "\t" + value];
+    return builder.locator.methods.openerp70;
+  }
+
+	// One2ManySelectRecord (must be before ListView)
+	if(jQuery(element).context.tagName.toLowerCase() == 'td'
+            && jQuery(element).parents('div.oe_form_field_one2many').length
+            && jQuery(element).hasClass('oe_list_field_cell')
+            && jQuery(element).parents('table.oe_list_content').length){
+
+      var one2manyElement = jQuery(element).closest('div.oe_view_manager')
+
+      var model = one2manyElement.attr('data-bt-testing-model_name');
+      var field = one2manyElement.attr('data-bt-testing-name');
+      var submodel = one2manyElement.attr('data-bt-testing-submodel_name');
+
+      var recordValue = '';
+      jQuery.each(jQuery(element).closest('tr').find('td.oe_list_field_cell'), function(index, value){
+        recordValue += "\t" + jQuery(value).attr('data-field') + '=' + jQuery(value).text()
+      });
+      values[builder.locator.methods.openerp70] = ["One2ManySelectRecord\t" + model + "\t" + field + "\t" + submodel + "\t" + recordValue];
+      return builder.locator.methods.openerp70;
 	}
 
-	// Select (selected one of the option)
-	if(jQuery(element).context.tagName.toLowerCase() == 'option'
-		&& jQuery(element).parents('.oe_form_field_selection').length){
-		model = jQuery(element).parent().attr('data-bt-testing-model_name');
-		name = jQuery(element).parent().attr('data-bt-testing-name');
-		value = jQuery.trim(jQuery(element).attr('data-bt-testing-value'));
-		values[builder.locator.methods.openerp70] = ["Select-Option\t" + model + "\t" + name + "\t" + value];		
-		return builder.locator.methods.openerp70;
+	// TODO: Select ListView 9.0
+	if(jQuery(element).context.tagName.toLowerCase() == 'td'
+            && jQuery(element).parents('table.o_list_view').length){
+
+      model = jQuery(element).attr('data-bt-testing-model_name');
+      var recordValue = '';
+
+      // TODO: has child with attribute data-field
+      jQuery.each(jQuery(element).closest('tr').find('td[data-field]'), function(index, value){
+        console.log("#" + jQuery(value).text() + "#");
+        if(jQuery(value).text().trim()) {
+          recordValue += "\t" + jQuery(value).attr('data-field') + '=' + jQuery(value).text().replace(/\\n/g, "\\\\n").replace(/\r?\n/g, "\\n")
+        }
+      });
+      values[builder.locator.methods.openerp70] = ["SelectListView\t" + model + "\t" + recordValue];
+      return builder.locator.methods.openerp70;
 	}
-	
+
+	// Select ListView 8.0
+	if(jQuery(element).context.tagName.toLowerCase() == 'td'
+            && jQuery(element).hasClass('oe_list_field_cell')
+            && jQuery(element).parents('table.oe_list_content').length){
+
+      model = jQuery(element).attr('data-bt-testing-model_name');
+      var recordValue = '';
+
+      jQuery.each(jQuery(element).closest('tr').find('td.oe_list_field_cell'), function(index, value){
+        recordValue += "\t" + jQuery(value).attr('data-field') + '=' + jQuery(value).text()
+      });
+      values[builder.locator.methods.openerp70] = ["SelectListView\t" + model + "\t" + recordValue];
+      return builder.locator.methods.openerp70;
+	}
+
+	// SidebarAction
+	if(jQuery(element).hasClass('oe_sidebar_action_a')) {
+
+      var type = jQuery(element).attr('data-bt-type');
+      var id = jQuery(element).attr('data-bt-id');
+      values[builder.locator.methods.openerp70] = ["SidebarAction\t" + type + "\t" + id];
+      return builder.locator.methods.openerp70;
+    }
+
+
 	values[builder.locator.methods.openerp70] = ["No match: "+jQuery(element).context.tagName+'#'+jQuery(element).parents()+'='+jQuery(element).text()];
 	return builder.locator.methods.openerp70;
 }
