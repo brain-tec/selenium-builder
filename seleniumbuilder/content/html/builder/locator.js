@@ -4,7 +4,7 @@
  * builder.locator.methods.id to "searchField".) The "preferredMethod" property specifies which
  * method should be used.
  */
- 
+
 builder.locator = {};
 
 /**
@@ -197,14 +197,14 @@ builder.locator.getCSSSubPath = function(e) {
   }
 };
 
-function mainMenu(element){	
+function mainMenu(element){
 	return "MainMenu('" + jQuery.trim(jQuery(element).attr('data-menu')) + "')";
 }
 
 function secondaryMenu(element){
-	
+
 	level = 0;
-	
+
 	try {
 		level = jQuery(element).parents().filter('.oe_secondary_submenu').length;
 
@@ -213,17 +213,17 @@ function secondaryMenu(element){
 			throw e;
 		}
 	}
-	
+
 	return "SubMenu(" + level + "', '" + jQuery.trim(jQuery(element).attr('data-menu')) + "')";
-	
+
 }
 
-function mainContent(element){	
+function mainContent(element){
 	return "mainContent()";
 }
 
 function sidebar(element){
-	return "sidebar()";	
+	return "sidebar()";
 }
 
 function inWindow(element){
@@ -389,8 +389,23 @@ function openerp70(values, element){
 
 	// Button 9.0 EE
 	if(jQuery(element).context.tagName.toLowerCase() == 'button'){
+		var model = jQuery(element).attr('data-bt-testing-model_name');
+		var value = jQuery.trim(jQuery(element).attr('data-bt-testing-name'));
+    // When we really have no information, we take the css classes
+    if(value === ''){
+      value = jQuery.trim(jQuery(element).attr('class'));
+		  values[builder.locator.methods.openerp70] = ["Button\tclass=" + value];
+    } else {
+      values[builder.locator.methods.openerp70] = ["Button\tmodel=" + model + "\tbutton_name=" + value];
+    }
+		return builder.locator.methods.openerp70;
+	}
+
+	// Button 7.0, 8.0
+	if(jQuery(element).context.tagName.toLowerCase() == 'button'){
+		model = jQuery(element).attr('data-bt-testing-model_name');
 		value = jQuery.trim(jQuery(element).attr('data-bt-testing-name'));
-		values[builder.locator.methods.openerp70] = ["Button    " + value];
+		values[builder.locator.methods.openerp70] = ["Button    " + model + "\t" + value];
 		return builder.locator.methods.openerp70;
 	}
 
@@ -406,11 +421,12 @@ function openerp70(values, element){
 
 	// NewOne2Many
 	if(jQuery(element).context.tagName.toLowerCase() == 'a'
-		&& jQuery(element).parents('.oe_form_field_one2many_list_row_add').length){
+		&& (jQuery(element).parents('.oe_form_field_one2many_list_row_add').length ||
+        jQuery(element).parents('.oe_form_field_many2many_list_row_add').length)){
 		var oe_view_manager = jQuery(element).closest('div.oe_view_manager');
 		model = oe_view_manager.attr('data-bt-testing-model_name');
 		name = oe_view_manager.attr('data-bt-testing-name');
-		values[builder.locator.methods.openerp70] = ["NewOne2Many    " + model + "    " + name];
+		values[builder.locator.methods.openerp70] = ["NewOne2Many    " + model + "\t" + name];
 		return builder.locator.methods.openerp70;
 	}
 	
@@ -420,7 +436,7 @@ function openerp70(values, element){
 		values[builder.locator.methods.openerp70] = ["ChangeView    " + value];
 		return builder.locator.methods.openerp70;
 	}
-	
+
 	// NotebookPage
 	if(jQuery(element).context.tagName.toLowerCase() == 'a'
 		&& jQuery(element).hasClass('ui-tabs-anchor')){
@@ -447,7 +463,7 @@ function openerp70(values, element){
 		model = jQuery(element).attr('data-bt-testing-model_name');
 		name = jQuery(element).attr('data-bt-testing-name');
 		value = jQuery.trim(jQuery(element).text());
-		values[builder.locator.methods.openerp70] = ["Many2OneSelect    " + model + "    " + name];
+		values[builder.locator.methods.openerp70] = ["Many2OneSelect    " + model + "\t" + name];
 		return builder.locator.methods.openerp70;
 	}
 
@@ -464,21 +480,23 @@ function openerp70(values, element){
 	// TagsNew
 	if(jQuery(element).context.tagName.toLowerCase() == 'textarea'
 		&& jQuery(element).parents('.oe_tags').length){
-		model = jQuery(element).attr('data-bt-testing-model_name');
+		[model, isX2Many] = getModel90EE(element);
 		name = jQuery(element).attr('data-bt-testing-name');
 		value = jQuery.trim(jQuery(element).text());
-		values[builder.locator.methods.openerp70] = ["TagsNew    " + model + "    " + name + "    " + value];
+    var keyword = isX2Many ? 'X2Many-TagsNew' : 'TagsNew';
+		values[builder.locator.methods.openerp70] = [keyword + "\t" + model + "\t" + name + "\t" + value];
 		return builder.locator.methods.openerp70;
 	}
-	
+
 	// TagsRemove
 	if(jQuery(element).context.tagName.toLowerCase() == 'a'
 		&& jQuery(element).attr('class').toLowerCase() == 'text-remove'
 		&& jQuery(element).parents('.oe_tags').length){
-		model = jQuery(element).attr('data-bt-testing-model_name');
+		[model, isX2Many] = getModel90EE(element);
 		name = jQuery(element).attr('data-bt-testing-name');
 		value = jQuery.trim(jQuery(element).siblings('span.text-label').text());
-		values[builder.locator.methods.openerp70] = ["TagsRemove    " + model + "    " + name + "    " + value];
+    var keyword = isX2Many ? 'X2Many-TagsRemove' : 'TagsRemove';
+		values[builder.locator.methods.openerp70] = [keyword + "\t" + model + "\t" + name + "\t" + value];
 		return builder.locator.methods.openerp70;
 	}
 
@@ -486,50 +504,55 @@ function openerp70(values, element){
 	if(jQuery(element).context.tagName.toLowerCase() == 'div'
 		&& jQuery(element).hasClass('text-tags')
 		&& jQuery(element).parents('.oe_tags').length){
-		model = jQuery(element).attr('data-bt-testing-model_name');
+		[model, isX2Many] = getModel90EE(element);
 		name = jQuery(element).attr('data-bt-testing-name');
 		value = jQuery.trim(jQuery(element).siblings('span.text-label').text());
-		values[builder.locator.methods.openerp70] = ["TagsRemove    " + model + "    " + name];
+    var keyword = isX2Many ? 'X2Many-TagsRemove' : 'TagsRemove';
+		values[builder.locator.methods.openerp70] = [keyword + "\t" + model + "\t" + name];
 		return builder.locator.methods.openerp70;
 	}
-	
+
 	// Checkbox
 	if(jQuery(element).context.tagName.toLowerCase() == 'input'
 		&& element.type.toLowerCase() == 'checkbox'){
-		model = jQuery(element).attr('data-bt-testing-model_name');
+		[model, isX2Many] = getModel90EE(element);
 		name = jQuery(element).attr('data-bt-testing-name');
 		value = jQuery.trim(jQuery(element).val());
-		values[builder.locator.methods.openerp70] = ["Checkbox    " + model + "    " + name];
+    var keyword = isX2Many ? 'X2Many-Checkbox' : 'Checkbox-Select';
+		values[builder.locator.methods.openerp70] = [keyword + "\t" + model + "\t" + name];
 		return builder.locator.methods.openerp70;
 	}
 
 	// Date
 	if(jQuery(element).context.tagName.toLowerCase() == 'input'
 		&& jQuery(element).parents('.oe_datepicker_root').length){
-		model = jQuery(element).attr('data-bt-testing-model_name');
+		[model, isX2Many] = getModel90EE(element);
 		name = jQuery(element).attr('data-bt-testing-name');
 		value = jQuery.trim(jQuery(element).val());
-		values[builder.locator.methods.openerp70] = ["Date    " + model + "    " + name];
+    var keyword = isX2Many ? 'X2Many-Date' : 'Date';
+		values[builder.locator.methods.openerp70] = [keyword + "\t" + model + "\t" + name];
 		return builder.locator.methods.openerp70;
 	}
-	
+
 	// Char
 	if(jQuery(element).context.tagName.toLowerCase() == 'input'
-		&& jQuery(element).parents('.oe_form_field_char').length){
-		model = jQuery(element).attr('data-bt-testing-model_name');
+		&& jQuery(element).attr('type').toLowerCase() == 'text'){
+		[model, isX2Many] = getModel90EE(element);
 		name = jQuery(element).attr('data-bt-testing-name');
 		value = jQuery.trim(jQuery(element).val());
-		values[builder.locator.methods.openerp70] = ["Char    " + model + "    " + name];
+    var keyword = isX2Many ? 'X2Many-Char' : 'Char';
+		values[builder.locator.methods.openerp70] = [keyword + "\t" + model + "\t" + name];
 		return builder.locator.methods.openerp70;
 	}
-	
+
 	// Float
 	if(jQuery(element).context.tagName.toLowerCase() == 'input'
 		&& jQuery(element).parents('.oe_form_field_float').length){
-		model = jQuery(element).attr('data-bt-testing-model_name');
-		name = jQuery(element).attr('data-bt-testing-name');
+    [model, isX2Many] = getModel90EE(element);
+    name = jQuery(element).attr('data-bt-testing-name');
 		value = jQuery.trim(jQuery(element).val());
-		values[builder.locator.methods.openerp70] = ["Float    " + model + "    " + name];
+    var keyword = isX2Many ? 'X2Many-Float' : 'Float';
+		values[builder.locator.methods.openerp70] = [keyword + "\t" + model + "\t" + name];
 		return builder.locator.methods.openerp70;
 	}
 
@@ -547,10 +570,10 @@ function openerp70(values, element){
 	// Text
 	if(jQuery(element).context.tagName.toLowerCase() == 'textarea'
 		&& jQuery(element).parents('.oe_form_field_text').length){
-		model = jQuery(element).attr('data-bt-testing-model_name');
+    [model, isX2Many] = getModel90EE(element);
 		name = jQuery(element).attr('data-bt-testing-name');
 		value = jQuery.trim(jQuery(element).val());
-		values[builder.locator.methods.openerp70] = ["Text    " + model + "    " + name];
+		values[builder.locator.methods.openerp70] = [keyword + "\t" + model + "\t" + name];
 		return builder.locator.methods.openerp70;
 	}
 
@@ -630,6 +653,9 @@ function openerp70(values, element){
 
 
 	values[builder.locator.methods.openerp70] = ["No match: "+jQuery(element).context.tagName+'#'+jQuery(element).parents()+'='+jQuery(element).text()];
+	if(jQuery(element).context.tagName=='TD' ) {
+		values[builder.locator.methods.openerp70] = [""];	                                            
+	}
 	return builder.locator.methods.openerp70;
 }
 
@@ -648,7 +674,7 @@ builder.locator.fromElement = function(element, applyTextTransforms) {
   // FIXME: This function needs a lot more thought, for example the "value" property is much
   // more useful for type="submit".
   // TODO: set locator.frame to be a locator to the frame containing the element
-  
+
   // Locate by ID
   var id = element.getAttribute('id');
   if (id) {
@@ -658,7 +684,7 @@ builder.locator.fromElement = function(element, applyTextTransforms) {
       preferredMethod = builder.locator.methods.id;
     }
   }
-  
+
   // Locate by name
   var name = element.getAttribute('name');
   if (name) {
@@ -667,10 +693,10 @@ builder.locator.fromElement = function(element, applyTextTransforms) {
       preferredMethod = builder.locator.methods.name;
     }
   }
-  
+
   // Locate by link text
   if ((element.tagName.toUpperCase() === "A") ||
-      (element.parentNode.tagName && element.parentNode.tagName.toUpperCase() === "A")) 
+      (element.parentNode.tagName && element.parentNode.tagName.toUpperCase() === "A"))
   {
     var el = element.tagName.toUpperCase() === "A" ? element : element.parentNode;
     var link = removeHTMLTags(el.innerHTML);
@@ -681,7 +707,7 @@ builder.locator.fromElement = function(element, applyTextTransforms) {
       }
     }
   }
-  
+
   // Locate by CSS
   var current = element;
   var sub_path = builder.locator.getCSSSubPath(element);
@@ -699,11 +725,11 @@ builder.locator.fromElement = function(element, applyTextTransforms) {
       preferredMethod = builder.locator.methods.css;
     }
   }
-  
+
   // Locate by XPath
   var xpath = getHtmlXPath(element);
   if (xpath) {
-    // Contrary to the XPath spec, Selenium requires the "//" at the start, even for paths that 
+    // Contrary to the XPath spec, Selenium requires the "//" at the start, even for paths that
     // don't start at the root.
     xpath = (xpath.substring(0, 2) !== "//" ? ("/" + xpath) : xpath);
     values[builder.locator.methods.xpath] = [xpath];
@@ -711,7 +737,7 @@ builder.locator.fromElement = function(element, applyTextTransforms) {
       preferredMethod = builder.locator.methods.xpath;
     }
   }
-  
+
   // Locate by XPath
   var fullxpath = getFullXPath(element);
   if (fullxpath && xpath != fullxpath) {
@@ -724,8 +750,8 @@ builder.locator.fromElement = function(element, applyTextTransforms) {
       preferredMethod = builder.locator.methods.xpath;
     }
   }
-  
-  // Locate by class 
+
+  // Locate by class
   var className = element.getAttribute('class');
   if (className && !values[builder.locator.methods.css]) {
     values[builder.locator.methods.css] = [element.tagName.toLowerCase() + "." + className.replace(/ .*/, '')];
@@ -760,7 +786,7 @@ var ELEMENT_NODE_TYPE = 1;
 
 function getFullXPath(node) {
   if (node.nodeName !== "body" && node.nodeName !== "html" && node.parentNode &&
-      node.parentNode.nodeName.toLowerCase() !== "body") 
+      node.parentNode.nodeName.toLowerCase() !== "body")
   {
     return getFullXPath(node.parentNode) + "/" + getChildSelector(node);
   } else {
@@ -768,9 +794,9 @@ function getFullXPath(node) {
   }
 }
 
-/** 
+/**
  * Gets the XPath bit between two /s for normal elements.
- * @param node The DOM node whose XPath selector to find 
+ * @param node The DOM node whose XPath selector to find
  */
 function getChildSelector(node) {
   // Figure out the index of this node amongst its siblings.
@@ -804,8 +830,8 @@ function getChildSelector(node) {
 
 /**
  * Get the Xpath to the given node, using HTML-specific attributes.
- * @param node The DOM node whose XPath we want 
- * @param doc The document the node is in 
+ * @param node The DOM node whose XPath we want
+ * @param doc The document the node is in
  */
 function getMyXPath(node, doc) {
   // We try a variety of approaches here:
@@ -820,7 +846,7 @@ function getMyXPath(node, doc) {
   var className = node.className;
   // The XPath syntax to match one class name out of many is atrocious.
   if (className && className.indexOf(' ') === -1 &&
-      doc.getElementsByClassName(className).length === 1) 
+      doc.getElementsByClassName(className).length === 1)
   {
     return "//" + nodeName + "[@class='" + className + "']";
   }
@@ -835,7 +861,7 @@ function getMyXPath(node, doc) {
   // so we give up and just return a child selector. Multiple bodies or htmls are the sign of
   // deeply disturbed HTML, so we can be OK with giving up at this point.
   if (nodeName !== "body" && nodeName !== "html" && node.parentNode &&
-      node.parentNode.nodeName.toLowerCase() !== "body") 
+      node.parentNode.nodeName.toLowerCase() !== "body")
   {
     return getMyXPath(node.parentNode, doc) + "/" + getChildSelector(node);
   } else {
@@ -843,7 +869,7 @@ function getMyXPath(node, doc) {
   }
 }
 
-/** 
+/**
  * Get an Xpath to a node using our knowledge of HTML.
  * Uses label[@for=] classnames, and textContent in addition to tagnames and ids.
  */
@@ -896,8 +922,8 @@ function hasNonstandardWhitespace(text) {
   return !(/^[ \S]*$/.test(text));
 }
 
-/** 
- * Uses the given locator to find the node it identifies. 
+/**
+ * Uses the given locator to find the node it identifies.
  */
 function findNode(locatorType, locator) {
   return builder.locator.locateElement(window.sebuilder.getRecordingWindow(), locatorType, locator);
