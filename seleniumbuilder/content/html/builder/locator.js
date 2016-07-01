@@ -653,7 +653,7 @@ function openerp70(values, element){
 
 
 	values[builder.locator.methods.openerp70] = ["No match: "+jQuery(element).context.tagName+'#'+jQuery(element).parents()+'='+jQuery(element).text()];
-	if(jQuery(element).context.tagName=='TD' ) {
+	if(jQuery(element).context.tagName=='TD' || builder.locator.methods.openerp70.indexOf("No match: SELECT#")>-1) {
 		values[builder.locator.methods.openerp70] = [""];	                                            
 	}
 	return builder.locator.methods.openerp70;

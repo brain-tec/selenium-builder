@@ -128,9 +128,7 @@ builder.selenium2.Recorder.prototype = {
     }, 1000);
 
     // Selects are handled via change events, so clicks on them can be ignored.
-    //if ({ 'select': true, 'option': true }[e.target.tagName.toLowerCase()]) {
-    //  return;
-    //}
+    //if ({ 'select': true, 'option': true }[e.target.tagName.toLowerCase()]) {return;}
     
     if (e.type == 'dblclick') {
       this.recordStep(new builder.Step(builder.selenium2.stepTypes.doubleClickElement, locator));
