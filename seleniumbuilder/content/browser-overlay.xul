@@ -3,6 +3,13 @@
 <overlay id="seleniumbuilder-overlay" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
     <script src="seleniumbuilder3.js" />
     
+    <menupopup id="menu_ToolsPopup"> 
+        <menuitem
+            label="&runseleniumbuilder;"
+            key="selenium-builder-run-key"
+            oncommand="sebuilder.boot()" />
+    </menupopup>
+
     <menupopup id="menuWebDeveloperPopup"> 
         <menuitem
             label="&runseleniumbuilder;"
@@ -23,6 +30,22 @@
             key="B"
             oncommand="sebuilder.boot()" />
     </keyset>
+
+	<statusbar id="status-bar">
+            <statusbarpanel id="selenium-builder-status-bar-icon"
+                class="statusbarpanel-iconic"
+                src="//seleniumbuilder/skin/statusbar.png"
+                tooltiptext="&runseleniumbuilder;"
+                onclick="bridge.boot()" />
+        </statusbar>
+
+        <toolbarpalette id="BrowserToolbarPalette">
+            <toolbarbutton id="selenium-builder-toolbar-button"
+                label="Selenium Builder"
+                image="//seleniumbuilder/skin/statusbar.png"
+                tooltiptext="&runseleniumbuilder;"
+                oncommand="bridge.boot()" />
+        </toolbarpalette>
 
     <popup id="contentAreaContextMenu">
         <menuitem id="selenium-builder-context-menu-launch"
