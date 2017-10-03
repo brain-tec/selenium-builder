@@ -1,3 +1,10 @@
+# Specific version of firefox required
+The latest version working together with this tool is:
+https://download-installer.cdn.mozilla.net/pub/devedition/releases/55.0b14/
+
+Al later versions disable the addon and do not work.
+
+
 # Selenium Builder
 
 Create Selenium tests in-browser.
