@@ -69,6 +69,7 @@ builder.locator.locateElementByXpath = function(window, xpath) {
   }
   // Why 7 as a parameter? No one knows. It's what http://coderepos.org/share/wiki/JavaScript-XPath uses.
   // And there's no docs, only a handful of examples. Sigh. But this *seems* to work. qqDPS
+	// 7 means: A result set containing snapshots of all the nodes matching the expression. The nodes in the result set are in the same order they appear in the document.
   var el = window.document.evaluate(xpath, window.document, null, 7, null);
   return el.snapshotItem(0) ? el.snapshotItem(0) : null;
 };
